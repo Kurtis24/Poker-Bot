@@ -3,8 +3,13 @@ import React from 'react'
 
 const PokerBot = () => {
   return (
-    <div>
-      
+    <div className='wrapper'>
+      <from action="">
+        <h1>Poker</h1>
+        <div className="input-box">
+          <input type="text" placeholder="UserName" required/>
+        </div>
+      </from>
     </div>
   )
 }
