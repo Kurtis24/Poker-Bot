@@ -17,7 +17,5 @@ image_path = os.path.join(image_folder, selected_image)
 
 if os.path.exists(image_path):
     img = Image.open(image_path)
-    img.show()
-    print(f"Selected image: {selected_image}")
 else:
-    print("Selected image not found.")
+    print("Error")
