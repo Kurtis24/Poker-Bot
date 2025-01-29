@@ -1,6 +1,9 @@
 import PokerBot from './Components/PokerForm/PokerBot';
 import './App.css';
-import (Scrollbars)
+
+const list = [
+  "big", "little", "fold"
+]
 
 function App() {
   return (
@@ -10,6 +13,19 @@ function App() {
      <button>Raise</button>
      <button>Fold</button>
     </div>
+
+    // Scroll bar
+      // <ul>
+      //   {
+      //     List.map((item) => 
+      //     <li className=''>
+      //       {item}
+      //     </li>
+      //     )
+      //   }
+
+      // </ul>
+
   );
 }
 
