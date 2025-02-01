@@ -1,15 +1,15 @@
 import React from 'react'
-//import './PokerBot.css';
+import './PokerBot.css';
 
 const PokerBot = () => {
   return (
     <div className='wrapper'>
-      <from action="">
+      {/* <from action=""> */}
         <h1>Poker</h1>
         <div className="input-box">
           <input type="text" placeholder="UserName" required/>
         </div>
-      </from>
+      {/* </from> */}
     </div>
   )
 }

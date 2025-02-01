@@ -1,31 +1,22 @@
-import PokerBot from './Components/PokerForm/PokerBot';
+import { useState } from "react";
+import PokerBot from './Components/PokerBot';
+import ScrollBar from './Components/ScrollBar';
+import BetButton from './Components/BetButton';
 import './App.css';
 
-const list = [
-  "big", "little", "fold"
-]
+
 
 function App() {
+  const [value, setValue] = useState(0); 
+
   return (
     <div>
      <PokerBot />
-     <button>Check</button>
-     <button>Raise</button>
-     <button>Fold</button>
+     <ScrollBar value={value} setValue={setValue} /> 
+      <BetButton value={value} />
+     
+     
     </div>
-
-    // Scroll bar
-      // <ul>
-      //   {
-      //     List.map((item) => 
-      //     <li className=''>
-      //       {item}
-      //     </li>
-      //     )
-      //   }
-
-      // </ul>
-
   );
 }
 

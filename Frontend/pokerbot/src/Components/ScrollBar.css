@@ -1,0 +1,27 @@
+.scrollbar-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.value-display {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+}
+
+.scrollbar {
+  width: 80vw;
+  max-width: 600px;
+  cursor: pointer;
+  background: white;
+  border-radius: 10px;
+  height: 8px;
+  outline: none;
+}

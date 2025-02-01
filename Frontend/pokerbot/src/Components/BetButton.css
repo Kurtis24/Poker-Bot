@@ -1,0 +1,23 @@
+.value-button {
+  margin-top: 15px;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px solid black;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.value-button:hover {
+  background-color: black;
+  color: white;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.value-button:active {
+  transform: scale(0.95);
+}
