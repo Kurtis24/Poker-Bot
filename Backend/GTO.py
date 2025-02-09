@@ -13,7 +13,7 @@ class Card:
 
 class Deck:
     ranks = "23456789TJQKA"
-    suits = "cdhs"  # clubs, diamonds, hearts, spades
+    suits = "cdhs"
 
     def __init__(self):
         self.cards = [Card(rank, suit) for rank in Deck.ranks for suit in Deck.suits]
@@ -26,9 +26,9 @@ class Deck:
         self.cards = self.cards[num:]
         return dealt_cards
 
-# --------------------------
-# Hand Evaluation Placeholder
-# --------------------------
+
+# __________________________ Hand Evaluation Placeholder __________________________ 
+
 def evaluate_hand(cards):
     """
     Evaluate the strength of a hand.
@@ -82,11 +82,10 @@ class GTOPlayer:
             elif hand_strength > 0.4:
                 return 'call', game_state.get('min_call', 10)
             else:
-                return 'fold', 0
+                return 'fold', 09
 
-# --------------------------
-# Game Engine Class
-# --------------------------
+
+# -------------------------- Game Engine Class --------------------------------
 class Game:
     def __init__(self, players):
         self.players = players  # List of GTOPlayer instances
@@ -121,6 +120,7 @@ class Game:
             'min_call': 10,    # Placeholder value
             'min_raise': 10    # Placeholder value
         }
+        
         for player in self.players:
             if player.chips <= 0:
                 continue  # Skip players with no chips

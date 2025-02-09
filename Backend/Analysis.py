@@ -18,12 +18,6 @@ class PlayerSentiment:
 if __name__ == "__main__":
     player = PlayerSentiment("Alice")
 
-    # Simulate some wins and losses
-    player.win()  # Alice won! Sentiment score: 1
-    player.win()  # Alice won! Sentiment score: 2
-    player.lose()  # Alice lost! Sentiment score: 1
-    player.lose()  # Alice lost! Sentiment score: 0
-    player.lose()  # Alice lost! Sentiment score: -1
-
+    
     # Get the final sentiment score
     print(f"Final sentiment score for {player.player_name}: {player.get_sentiment_score()}")
