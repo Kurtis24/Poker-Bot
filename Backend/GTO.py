@@ -1,7 +1,12 @@
 import random
+# Import from deuces – make sure Deuces is installed and in your PYTHONPATH.
+from deuces import Card as DeucesCard, Evaluator
+
+# Create a single evaluator instance (to avoid re-instantiating every time).
+evaluator = Evaluator()
 
 # --------------------------
-# Card and Deck Definitions
+# Existing Card and Deck Classes
 # --------------------------
 class Card:
     def __init__(self, rank, suit):
@@ -9,11 +14,12 @@ class Card:
         self.suit = suit
 
     def __repr__(self):
+        # For example, Ace of clubs is represented as "Ac"
         return f"{self.rank}{self.suit}"
 
 class Deck:
     ranks = "23456789TJQKA"
-    suits = "cdhs"
+    suits = "cdhs"  # clubs, diamonds, hearts, spades
 
     def __init__(self):
         self.cards = [Card(rank, suit) for rank in Deck.ranks for suit in Deck.suits]
@@ -26,20 +32,45 @@ class Deck:
         self.cards = self.cards[num:]
         return dealt_cards
 
-
-# __________________________ Hand Evaluation Placeholder __________________________ 
-
-def evaluate_hand(cards):
+# --------------------------
+# Helper: Convert Custom Card to Deuces Format
+# --------------------------
+def convert_card(custom_card):
     """
-    Evaluate the strength of a hand.
-    
-    In a production engine, replace this with a sophisticated hand evaluation function.
-    For demonstration purposes, we return a random float between 0 and 1.
+    Converts our custom Card object to the integer representation expected by Deuces.
+    The DeucesCard.new method accepts a string (e.g., "Ac" for Ace of clubs).
     """
-    return random.random()
+    return DeucesCard.new(str(custom_card))
 
 # --------------------------
-# GTO-Inspired Player Class
+# Modified Hand Evaluation Using Deuces
+# --------------------------
+def evaluate_hand(cards):
+    """
+    Evaluate the strength of a hand using the Deuces evaluator.
+    
+    Parameters:
+      cards: A list of Card objects. It is assumed that the first two are the player's
+             hole cards and the remaining (if any) are board cards.
+    
+    Returns:
+      A normalized hand strength between 0 and 1, where 1 is the best.
+    """
+    # Separate hole cards and board cards.
+    hole_cards = [convert_card(c) for c in cards[:2]]
+    board_cards = [convert_card(c) for c in cards[2:]]
+    
+    # Evaluate the hand using Deuces.
+    score = evaluator.evaluate(hole_cards, board_cards)
+    
+    # Normalize the score. In Deuces:
+    #  - Best hand (e.g., a Royal Flush) scores 1.
+    #  - Worst hand scores 7462.
+    normalized = (7463 - score) / 7462
+    return normalized
+
+# --------------------------
+# GTO-Inspired Player Class (unchanged)
 # --------------------------
 class GTOPlayer:
     def __init__(self, name, chips):
@@ -51,20 +82,8 @@ class GTOPlayer:
         self.hole_cards = cards
 
     def decide_action(self, game_state):
-        """
-        Decide an action based on game state.
-        
-        game_state: A dictionary with keys such as 'board', 'pot', 'min_call', 'min_raise', etc.
-        
-        This simplified logic uses:
-          - Pre-flop: if any hole card is high (A, K, Q, J, T) then raise; otherwise, call.
-          - Post-flop: evaluate the hand (placeholder) and:
-                - Raise if hand strength > 0.8
-                - Call if hand strength is between 0.4 and 0.8
-                - Fold if hand strength < 0.4
-        """
         board = game_state.get('board', [])
-        if not board:  # Pre-Flop decision
+        if not board:  # Pre-Flop decision (simple heuristic)
             ranks = [card.rank for card in self.hole_cards]
             high_cards = ['A', 'K', 'Q', 'J', 'T']
             if any(r in high_cards for r in ranks):
@@ -73,7 +92,7 @@ class GTOPlayer:
             else:
                 return 'call', game_state.get('min_call', 10)
         else:
-            # Post-flop decision
+            # Post-flop decision using Deuces hand evaluation.
             all_cards = self.hole_cards + board
             hand_strength = evaluate_hand(all_cards)
             if hand_strength > 0.8:
@@ -82,17 +101,18 @@ class GTOPlayer:
             elif hand_strength > 0.4:
                 return 'call', game_state.get('min_call', 10)
             else:
-                return 'fold', 09
+                return 'fold', 0
 
-
-# -------------------------- Game Engine Class --------------------------------
+# --------------------------
+# Game Engine Class (unchanged except for using the new evaluate_hand)
+# --------------------------
 class Game:
     def __init__(self, players):
         self.players = players  # List of GTOPlayer instances
         self.deck = Deck()
         self.board = []         # Community cards
         self.pot = 0
-        self.current_bet = 0    # Current bet level (for a simplified model)
+        self.current_bet = 0    # Simplified current bet
         self.betting_history = []
 
     def start_hand(self):
@@ -101,18 +121,10 @@ class Game:
         self.board = []
         self.pot = 0
         self.current_bet = 0
-        # Deal two hole cards to each player.
         for player in self.players:
             player.set_hole_cards(self.deck.deal(2))
 
     def betting_round(self, street):
-        """
-        Execute a simplified betting round.
-        
-        In a production engine, you would need to handle:
-          - Multiple betting rounds with raises, calls, and folds in more detail.
-          - Tracking active players and pot odds.
-        """
         print(f"\n--- {street} Betting Round ---")
         game_state = {
             'board': self.board,
@@ -120,14 +132,12 @@ class Game:
             'min_call': 10,    # Placeholder value
             'min_raise': 10    # Placeholder value
         }
-        
         for player in self.players:
             if player.chips <= 0:
                 continue  # Skip players with no chips
             action, amount = player.decide_action(game_state)
             print(f"{player.name} chooses to {action} with amount {amount}.")
             if action == 'fold':
-                # For a full engine, you would mark the player as folded for this hand.
                 print(f"{player.name} folds and is removed from the hand.")
             elif action == 'call':
                 self.pot += amount
@@ -135,22 +145,13 @@ class Game:
             elif action == 'raise':
                 self.pot += amount
                 player.chips -= amount
-            # Note: This simple implementation does not handle multiple raises or bet matching.
 
     def deal_community_cards(self, num, street):
-        """
-        Deal community cards (Flop, Turn, River).
-        """
         cards = self.deck.deal(num)
         self.board.extend(cards)
         print(f"{street} cards: {cards}")
 
     def showdown(self):
-        """
-        Determine the winner by comparing evaluated hand strengths.
-        
-        In a complete engine, you would also consider split pots, side pots, and tie-breaking rules.
-        """
         print("\n--- Showdown ---")
         best_strength = -1
         winner = None
@@ -168,39 +169,24 @@ class Game:
         self.pot = 0
 
     def play_hand(self):
-        """
-        Play through an entire hand of Texas Hold’em.
-        """
         self.start_hand()
         print("\n--- Dealing Hole Cards ---")
         for player in self.players:
             print(f"{player.name}: {player.hole_cards}")
 
-        # Pre-Flop betting
         self.betting_round("Pre-Flop")
-
-        # Flop
         self.deal_community_cards(3, "Flop")
         self.betting_round("Flop")
-
-        # Turn
         self.deal_community_cards(1, "Turn")
         self.betting_round("Turn")
-
-        # River
         self.deal_community_cards(1, "River")
         self.betting_round("River")
-
-        # Showdown
         self.showdown()
 
 # --------------------------
 # Main Execution
 # --------------------------
 if __name__ == '__main__':
-    # Create players with starting chips
     players = [GTOPlayer("Player1", 1000), GTOPlayer("Player2", 1000)]
     game = Game(players)
-
-    # Play one hand (you can loop this for multiple hands)
     game.play_hand()
