@@ -1,5 +1,6 @@
 import random
 import os
+import Analysis
 from PIL import Image
 
 image_folder = 'Backend/Cards/'

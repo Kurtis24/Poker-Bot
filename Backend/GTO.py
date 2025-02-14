@@ -1,6 +1,7 @@
 import random
 # Import from deuces – make sure Deuces is installed and in your PYTHONPATH.
-from deuces import Card as DeucesCard, Evaluator
+from Deuces import Card as DeucesCard, Evaluator
+
 
 # Create a single evaluator instance (to avoid re-instantiating every time).
 evaluator = Evaluator()
@@ -40,6 +41,7 @@ def convert_card(custom_card):
     Converts our custom Card object to the integer representation expected by Deuces.
     The DeucesCard.new method accepts a string (e.g., "Ac" for Ace of clubs).
     """
+    # return to anaylsis page
     return DeucesCard.new(str(custom_card))
 
 # --------------------------
