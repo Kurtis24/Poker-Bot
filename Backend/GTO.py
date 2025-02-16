@@ -19,8 +19,8 @@ class Card:
         return f"{self.rank}{self.suit}"
 
 class Deck:
-    ranks = "23456789TJQKA"
-    suits = "cdhs"  # clubs, diamonds, hearts, spades
+    ranks = [range(1, 13)]
+    suits = "CDHS"  # clubs, diamonds, hearts, spades
 
     def __init__(self):
         self.cards = [Card(rank, suit) for rank in Deck.ranks for suit in Deck.suits]
@@ -87,7 +87,7 @@ class GTOPlayer:
         board = game_state.get('board', [])
         if not board:  # Pre-Flop decision (simple heuristic)
             ranks = [card.rank for card in self.hole_cards]
-            high_cards = ['A', 'K', 'Q', 'J', 'T']
+            high_cards = ['1', '13', '12', '11', '10']
             if any(r in high_cards for r in ranks):
                 bet = min(self.chips, game_state.get('min_raise', 10) * 2)
                 return 'raise', bet

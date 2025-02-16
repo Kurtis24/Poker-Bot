@@ -1,4 +1,3 @@
-import GTO
 from GTO import showdown as showdown
 
 class PlayerSentiment:
