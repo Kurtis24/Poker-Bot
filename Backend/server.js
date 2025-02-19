@@ -1,44 +1,46 @@
 const express = require("express");
 const cors = require("cors");
+const { spawn } = require("child_process");
+const WebSocket = require("ws");
 
 const app = express();
 const PORT = process.env.PORT || 3030;
 
-app.use(cors()); // Allows frontend to communicate with backend
-app.use(express.json()); // Allows backend to parse JSON request bodies
+app.use(cors());
+app.use(express.json());
 
-// GET endpoint (already works)
-app.get("/api/data", (req, res) => {
-  res.json({ message: "Hello from the backend!" });
-});
+const wss = new WebSocket.Server({ port: 3030 }); // WebSocket Server on port 8080
 
-// POST endpoint (fixed response)
-let storedMessages = []; // ✅ Store received messages
+wss.on("connection", (ws) => {
+  console.log("Client connected to WebSocket");
 
-app.post("/api/send", (req, res) => {
-  console.log("Received POST request to /api/send");
-  console.log("Request body:", req.body);
+  ws.on("message", (message) => {
+    console.log(`Received from frontend: ${message}`);
 
-  if (!req.body.message) {
-    return res.status(400).json({ error: "Message is required" });
-  }
+    const pythonProcess = spawn("python", ["main.py"]);
 
-  storedMessages.push(req.body.message); // ✅ Save message to array
+    pythonProcess.stdin.write(JSON.stringify({ message: message.toString() }));
+    pythonProcess.stdin.end();
 
-  res.json({
-    status: "Success",
-    receivedMessage: req.body.message,
-    allMessages: storedMessages, // ✅ Return all stored messages
+    pythonProcess.stdout.on("data", (data) => {
+      const responses = data.toString().trim().split("\n");
+      responses.forEach((response) => {
+        ws.send(response); // Send each response to frontend dynamically
+      });
+    });
+
+    pythonProcess.stderr.on("data", (data) => {
+      console.error(`Python Error: ${data}`);
+    });
+
+    pythonProcess.on("close", (code) => {
+      console.log(`Python process exited with code ${code}`);
+      ws.send(JSON.stringify({ done: true })); // Indicate completion
+    });
   });
-});
 
-// GET endpoint to retrieve messages
-app.get("/api/send", (req, res) => {
-  res.json({
-    storedMessages: storedMessages, // ✅ Return stored messages
-  });
+  ws.on("close", () => console.log("Client disconnected"));
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
