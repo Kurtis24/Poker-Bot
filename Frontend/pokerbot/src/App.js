@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import PokerBot from "./Components/PokerBot";
 import ScrollBar from "./Components/ScrollBar";
+import CheckBut from "./Components/CheckBut";
+import FoldBut from "./Components/FoldBut";
 import BetButton from "./Components/BetButton";
 import "./App.css";
 
@@ -55,7 +57,8 @@ const App = () => {
       <PokerBot />
       <ScrollBar value={value} setValue={setValue} />
       <BetButton value={value} />
-
+      <CheckBut value={value} />
+      <FoldBut value={value} />
       <div>
         <h3>Enter a Message:</h3>
         <input
