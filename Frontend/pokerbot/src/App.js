@@ -8,9 +8,10 @@ import "./App.css";
 
 const App = () => {
   const [value, setValue] = useState(0);
-  const [messages, setMessages] = useState([]); // ✅ Store received messages
-  const [input, setInput] = useState(""); // ✅ User input
-  const ws = useRef(null); // ✅ WebSocket connection stored in ref
+  const [messages, setMessages] = useState([]); // For text messages from backend
+  const [images, setImages] = useState([]); // For images received from backend
+  const [input, setInput] = useState(""); // User input
+  const ws = useRef(null); // WebSocket connection stored in ref
 
   useEffect(() => {
     const connectWebSocket = () => {
@@ -21,18 +22,40 @@ const App = () => {
       ws.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log("🔹 Received from backend:", data); // ✅ Debugging
+          console.log("🔹 Received from backend:", data);
+          // Check if this message has a final response with sentiment analysis and images
+          if (data.sentiment_analysis) {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              data.sentiment_analysis,
+            ]);
+          } else if (data.response) {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              data.response,
+            ]);
+          } else {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              JSON.stringify(data),
+            ]);
+          }
+
+          // If the response includes selected_images, update the images state.
+          if (data.selected_images && Array.isArray(data.selected_images)) {
+            setImages(data.selected_images);
+          }
+          
           if (data.done) {
             console.log("✅ Python process completed");
-          } else {
-            setMessages((prevMessages) => [...prevMessages, data.response || JSON.stringify(data)]);
           }
         } catch (error) {
           console.error("❌ Error parsing WebSocket message:", error);
         }
       };
 
-      ws.current.onerror = (error) => console.error("❌ WebSocket Error:", error);
+      ws.current.onerror = (error) =>
+        console.error("❌ WebSocket Error:", error);
       ws.current.onclose = () => {
         console.warn("⚠️ WebSocket Disconnected. Reconnecting...");
         setTimeout(connectWebSocket, 2000);
@@ -44,10 +67,11 @@ const App = () => {
   }, []);
 
   const sendMessage = () => {
-    if (!input.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN) return;
-    setMessages((prevMessages) => [...prevMessages, `You: ${input}`]); // ✅ Show user's sent message
+    if (!input.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN)
+      return;
+    setMessages((prevMessages) => [...prevMessages, `You: ${input}`]);
     ws.current.send(input);
-    setInput(""); // ✅ Clear input field after sending
+    setInput("");
   };
 
   return (
@@ -59,6 +83,7 @@ const App = () => {
       <BetButton value={value} />
       <CheckBut value={value} />
       <FoldBut value={value} />
+
       <div>
         <h3>Enter a Message:</h3>
         <input
@@ -67,7 +92,9 @@ const App = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
         />
-        <button onClick={sendMessage} disabled={!input.trim()}>Send</button>
+        <button onClick={sendMessage} disabled={!input.trim()}>
+          Send
+        </button>
       </div>
 
       <div>
@@ -80,6 +107,26 @@ const App = () => {
           </ul>
         ) : (
           <p>No messages yet</p>
+        )}
+      </div>
+
+      <div>
+        <h3>Selected Images:</h3>
+        {images.length > 0 ? (
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            {images.map((item, index) => (
+              <div key={index} style={{ margin: "10px", textAlign: "center" }}>
+                <img
+                  src={item.image} // Ensure this path is accessible from the frontend
+                  alt={`Card ${item.number}`}
+                  style={{ width: "150px", height: "auto" }}
+                />
+                <p>Card {item.number}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No images to display</p>
         )}
       </div>
     </div>

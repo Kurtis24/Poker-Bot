@@ -17,7 +17,7 @@ const FoldBut = () => {
       onClick={handleClick}
       disabled={!isActive} // Disable when false
     >
-      {isActive ? "Click Me" : "Wait..."}
+      {isActive ? "Fold" : "Wait..."}
     </button>
   );
 };

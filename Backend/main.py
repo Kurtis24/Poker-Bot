@@ -22,28 +22,31 @@ def generate_dynamic_response(message):
         sys.stdout.flush()  # ✅ Ensure Node.js gets the response immediately
         time.sleep(2)  # ✅ Simulate processing delay
 
-def get_number():
-    """Randomly select an image file number from the Cards folder"""
+def get_three_random_images():
+    """Randomly select three image files from the Cards folder"""
     try:
         image_files = [f for f in os.listdir(image_folder) if f.endswith('.png')]
         if not image_files:
             return None, "No images found in folder"
-
-        numbers = [int(os.path.splitext(f)[0]) for f in image_files]
-        selected_number = random.choice(numbers)
-        selected_image = f"{selected_number}.png"
-        image_path = os.path.join(image_folder, selected_image)
-
-        return selected_number, image_path  # ✅ Return both the number and image path
+        
+        # If there are fewer than 3 images, return all; otherwise sample 3
+        selected_files = random.sample(image_files, min(3, len(image_files)))
+        images_data = []
+        for filename in selected_files:
+            number = int(os.path.splitext(filename)[0])
+            image_path = os.path.join(image_folder, filename)
+            images_data.append({"number": number, "image": image_path})
+        
+        return images_data, None
     except Exception as e:
-        return None, f"Error selecting image: {str(e)}"  # ✅ Handle errors
+        return None, f"Error selecting images: {str(e)}"
 
 def main():
     """Main function to execute Python logic and send response to Node.js"""
-    selected_number, image_path = get_number()
+    images_data, error = get_three_random_images()
     
-    if selected_number is None:
-        print(json.dumps({"error": image_path}))  # ✅ Send error message
+    if images_data is None:
+        print(json.dumps({"error": error}))  # ✅ Send error message
         sys.stdout.flush()
         return
 
@@ -52,8 +55,7 @@ def main():
     win_message = player.win()  # ✅ Assume this returns a string
 
     response = {
-        "selected_number": selected_number,
-        "image": image_path,
+        "selected_images": images_data,
         "sentiment_analysis": win_message
     }
 

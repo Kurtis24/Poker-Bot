@@ -17,7 +17,7 @@ const CheckBut = () => {
       onClick={handleClick}
       disabled={!isActive} // Disable when false
     >
-      {isActive ? "Click Me" : "Wait..."}
+      {isActive ? "Check" : "Wait..."}
     </button>
   );
 };

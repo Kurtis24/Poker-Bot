@@ -9,7 +9,7 @@
 }
 
 .toggle-button.active {
-  background-color: #4caf50;
+  background-color: red;
   color: white;
 }
 
