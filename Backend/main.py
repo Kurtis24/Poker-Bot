@@ -3,10 +3,11 @@ import os
 import sys
 import json
 import time
+import urllib.parse
 from PIL import Image
 import Analysis
 
-image_folder = 'Backend/Cards/'  # ✅ Ensure this path is correct
+image_folder = 'Cards/'  # ✅ Ensure this path is correct
 
 def generate_dynamic_response(message):
     """Generate dynamic responses and send them to Node.js via stdout"""
@@ -22,30 +23,30 @@ def generate_dynamic_response(message):
         sys.stdout.flush()  # ✅ Ensure Node.js gets the response immediately
         time.sleep(2)  # ✅ Simulate processing delay
 
-def get_three_random_images():
-    """Randomly select three image files from the Cards folder"""
+def get_random_image():
+    """Randomly select one image file from the Cards folder and return its URL-encoded URL."""
     try:
         image_files = [f for f in os.listdir(image_folder) if f.endswith('.png')]
         if not image_files:
             return None, "No images found in folder"
         
-        # If there are fewer than 3 images, return all; otherwise sample 3
-        selected_files = random.sample(image_files, min(3, len(image_files)))
-        images_data = []
-        for filename in selected_files:
-            number = int(os.path.splitext(filename)[0])
-            image_path = os.path.join(image_folder, filename)
-            images_data.append({"number": number, "image": image_path})
+        selected_file = random.choice(image_files)
+        # Extract the number (assumes file format like "1 C.png", so split by space)
+        number = selected_file.split(" ")[0]
+        # URL-encode the filename to handle spaces and other special characters
+        encoded_filename = urllib.parse.quote(selected_file)
+        base_url = "http://localhost:3000/cards/"  # Adjust if necessary
+        image_url = base_url + encoded_filename
         
-        return images_data, None
+        return {"number": number, "image": image_url}, None
     except Exception as e:
-        return None, f"Error selecting images: {str(e)}"
+        return None, f"Error selecting image: {str(e)}"
 
 def main():
     """Main function to execute Python logic and send response to Node.js"""
-    images_data, error = get_three_random_images()
+    image_data, error = get_random_image()
     
-    if images_data is None:
+    if image_data is None:
         print(json.dumps({"error": error}))  # ✅ Send error message
         sys.stdout.flush()
         return
@@ -55,7 +56,7 @@ def main():
     win_message = player.win()  # ✅ Assume this returns a string
 
     response = {
-        "selected_images": images_data,
+        "selected_image": image_data,
         "sentiment_analysis": win_message
     }
 

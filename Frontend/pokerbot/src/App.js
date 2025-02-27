@@ -23,29 +23,21 @@ const App = () => {
         try {
           const data = JSON.parse(event.data);
           console.log("🔹 Received from backend:", data);
-          // Check if this message has a final response with sentiment analysis and images
+          
+          // Append sentiment analysis or dynamic responses as messages
           if (data.sentiment_analysis) {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              data.sentiment_analysis,
-            ]);
+            setMessages((prev) => [...prev, data.sentiment_analysis]);
           } else if (data.response) {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              data.response,
-            ]);
+            setMessages((prev) => [...prev, data.response]);
           } else {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              JSON.stringify(data),
-            ]);
+            setMessages((prev) => [...prev, JSON.stringify(data)]);
           }
 
-          // If the response includes selected_images, update the images state.
+          // If the backend sends an array of images, update the images state.
           if (data.selected_images && Array.isArray(data.selected_images)) {
             setImages(data.selected_images);
           }
-          
+
           if (data.done) {
             console.log("✅ Python process completed");
           }
@@ -67,9 +59,8 @@ const App = () => {
   }, []);
 
   const sendMessage = () => {
-    if (!input.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN)
-      return;
-    setMessages((prevMessages) => [...prevMessages, `You: ${input}`]);
+    if (!input.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN) return;
+    setMessages((prev) => [...prev, `You: ${input}`]);
     ws.current.send(input);
     setInput("");
   };
@@ -117,7 +108,7 @@ const App = () => {
             {images.map((item, index) => (
               <div key={index} style={{ margin: "10px", textAlign: "center" }}>
                 <img
-                  src={item.image} // Ensure this path is accessible from the frontend
+                  src={item.image}  // This URL should be accessible (e.g., http://localhost:3000/cards/1.png)
                   alt={`Card ${item.number}`}
                   style={{ width: "150px", height: "auto" }}
                 />
