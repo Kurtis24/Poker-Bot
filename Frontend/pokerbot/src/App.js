@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import PokerBot from "./Components/PokerBot";
 import ScrollBar from "./Components/ScrollBar";
-import CheckBut from "./Components/CheckBut";
+import CheckButton from "./Components/CheckBut";
 import FoldBut from "./Components/FoldBut";
 import BetButton from "./Components/BetButton";
+import GameControls from "./Components/GameControls"; 
 import "./App.css";
 
 const App = () => {
@@ -23,23 +24,20 @@ const App = () => {
         try {
           const data = JSON.parse(event.data);
           console.log("🔹 Received from backend:", data);
-          
-          // Append sentiment analysis or dynamic responses as messages
-          if (data.sentiment_analysis) {
+
+          // If the data contains a selected image, update images state
+          if (data.selected_image) {
+            setImages([data.selected_image]);
+          }
+          // Otherwise, handle textual responses
+          else if (data.sentiment_analysis) {
             setMessages((prev) => [...prev, data.sentiment_analysis]);
           } else if (data.response) {
             setMessages((prev) => [...prev, data.response]);
-          } else {
-            setMessages((prev) => [...prev, JSON.stringify(data)]);
-          }
-
-          // If the backend sends an array of images, update the images state.
-          if (data.selected_images && Array.isArray(data.selected_images)) {
-            setImages(data.selected_images);
-          }
-
-          if (data.done) {
+          } else if (data.done) {
             console.log("✅ Python process completed");
+          } else {
+            // Optionally ignore other messages
           }
         } catch (error) {
           console.error("❌ Error parsing WebSocket message:", error);
@@ -59,7 +57,12 @@ const App = () => {
   }, []);
 
   const sendMessage = () => {
-    if (!input.trim() || !ws.current || ws.current.readyState !== WebSocket.OPEN) return;
+    if (
+      !input.trim() ||
+      !ws.current ||
+      ws.current.readyState !== WebSocket.OPEN
+    )
+      return;
     setMessages((prev) => [...prev, `You: ${input}`]);
     ws.current.send(input);
     setInput("");
@@ -72,8 +75,9 @@ const App = () => {
       <PokerBot />
       <ScrollBar value={value} setValue={setValue} />
       <BetButton value={value} />
-      <CheckBut value={value} />
+      <CheckButton value={value} />
       <FoldBut value={value} />
+      <GameControls value={value} />
 
       <div>
         <h3>Enter a Message:</h3>
@@ -102,13 +106,13 @@ const App = () => {
       </div>
 
       <div>
-        <h3>Selected Images:</h3>
+        <h3>Selected Image:</h3>
         {images.length > 0 ? (
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             {images.map((item, index) => (
               <div key={index} style={{ margin: "10px", textAlign: "center" }}>
                 <img
-                  src={item.image}  // This URL should be accessible (e.g., http://localhost:3000/cards/1.png)
+                  src={item.image}  // e.g., http://localhost:3000/cards/9%20H.png
                   alt={`Card ${item.number}`}
                   style={{ width: "150px", height: "auto" }}
                 />
@@ -117,7 +121,7 @@ const App = () => {
             ))}
           </div>
         ) : (
-          <p>No images to display</p>
+          <p>No image to display</p>
         )}
       </div>
     </div>

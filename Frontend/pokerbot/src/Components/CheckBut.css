@@ -1,24 +1,25 @@
-.toggle-button {
+.check-btn {
   padding: 12px 24px;
   font-size: 16px;
   font-weight: bold;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s;
-}
-
-.toggle-button.active {
-  background-color: #4caf50;
+  transition: all 0.3s ease-in-out;
+  background-color: #008cba; /* Blue */
   color: white;
 }
 
-.toggle-button.disabled {
-  background-color: #d3d3d3;
-  color: gray;
-  cursor: not-allowed;
+.check-btn:hover {
+  background-color: #0077a3;
 }
 
-.toggle-button:active {
+.check-btn:active {
   transform: scale(0.95);
+}
+
+.check-btn.disabled {
+  background-color: #bbb; /* Grey when disabled */
+  color: #666;
+  cursor: not-allowed;
 }

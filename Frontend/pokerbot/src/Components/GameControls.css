@@ -1,0 +1,43 @@
+.game-controls {
+    text-align: center;
+  }
+  
+  h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  
+  .game-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    margin: 10px;
+  }
+  
+  .game-btn.enabled {
+    background-color: #008cba; /* Blue */
+    color: white;
+  }
+  
+  .game-btn.enabled:hover {
+    background-color: #0077a3;
+  }
+  
+  .game-btn.disabled {
+    background-color: #bbb; /* Grey when disabled */
+    color: #666;
+    cursor: not-allowed;
+  }
+  
+  .fold-btn {
+    background-color: #e74c3c; /* Red for fold */
+  }
+  
+  .fold-btn:hover {
+    background-color: #c0392b;
+  }
+  

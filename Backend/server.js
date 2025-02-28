@@ -6,15 +6,17 @@ const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const WS_PORT = 3030;
 
 app.use(cors());
 app.use(express.json());
 
 // Serve static images from the 'Cards' folder.
-// Images will be accessible under the URL: http://localhost:3000/cards/<filename>
-app.use('/Cards', express.static(path.join(__dirname, 'Cards')));
+// Images will be accessible via URLs like http://localhost:3000/cards/filename.png
+app.use('/cards', express.static(path.join(__dirname, 'Cards')));
 
-const wss = new WebSocket.Server({ port: 3030 });
+// Set up the WebSocket server on port 3030.
+const wss = new WebSocket.Server({ port: WS_PORT });
 
 wss.on("connection", (ws) => {
   console.log("Client connected to WebSocket");
@@ -22,19 +24,20 @@ wss.on("connection", (ws) => {
   ws.on("message", (message) => {
     console.log(`Received from frontend: ${message}`);
 
-    // Spawn the Python process with main.py (ensure main.py is in the same directory)
+    // Spawn the Python process to select a random image.
     const pythonProcess = spawn("python", ["main.py"]);
 
-    // Write the incoming message to Python's stdin as JSON
-    pythonProcess.stdin.write(JSON.stringify({ message: message.toString() }));
+    // Send the incoming message to Python's stdin.
+    pythonProcess.stdin.write(JSON.stringify({ message: message.toString() }) + "\n");
     pythonProcess.stdin.end();
 
-    // Listen for data from Python's stdout
+    // Collect Python's stdout and send it back to the client.
     pythonProcess.stdout.on("data", (data) => {
-      // Python may send multiple JSON lines; split and send each one
       const responses = data.toString().trim().split("\n");
       responses.forEach((response) => {
-        ws.send(response);
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(response);
+        }
       });
     });
 
@@ -44,7 +47,6 @@ wss.on("connection", (ws) => {
 
     pythonProcess.on("close", (code) => {
       console.log(`Python process exited with code ${code}`);
-      ws.send(JSON.stringify({ done: true })); // Indicate completion to frontend
     });
   });
 
@@ -52,5 +54,6 @@ wss.on("connection", (ws) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`HTTP Server running on http://localhost:${PORT}`);
+  console.log(`WebSocket Server running on ws://localhost:${WS_PORT}`);
 });
