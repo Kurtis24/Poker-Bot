@@ -31,7 +31,7 @@ const GameControls = () => {
       </button>
 
       <button
-        className={`game-btn fold-btn ${isEnabled ? "enabled" : "disabled"}`}
+        className={`fold-btn ${isEnabled ? "enabled" : "disabled"}`}
         onClick={() => handleAction("fold")}
         disabled={!isEnabled}
       >

@@ -1,4 +1,4 @@
-from GTO import GTOPlayer
+from GameAnaylsis import GTOPlayer as GTOPlayer
 import main as main 
 
 class PlayerSentiment:

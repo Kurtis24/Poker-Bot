@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import PokerBot from "./Components/PokerBot";
 import ScrollBar from "./Components/ScrollBar";
-import CheckButton from "./Components/CheckBut";
-import FoldBut from "./Components/FoldBut";
 import BetButton from "./Components/BetButton";
 import GameControls from "./Components/GameControls"; 
 import "./App.css";
@@ -70,13 +67,9 @@ const App = () => {
 
   return (
     <div>
-      <h1>React + Node.js + Python (Live Updates)</h1>
 
-      <PokerBot />
       <ScrollBar value={value} setValue={setValue} />
       <BetButton value={value} />
-      <CheckButton value={value} />
-      <FoldBut value={value} />
       <GameControls value={value} />
 
       <div>
@@ -93,20 +86,6 @@ const App = () => {
       </div>
 
       <div>
-        <h3>Messages:</h3>
-        {messages.length > 0 ? (
-          <ul>
-            {messages.map((msg, index) => (
-              <li key={index}>{msg}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No messages yet</p>
-        )}
-      </div>
-
-      <div>
-        <h3>Selected Image:</h3>
         {images.length > 0 ? (
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             {images.map((item, index) => (
@@ -114,15 +93,12 @@ const App = () => {
                 <img
                   src={item.image}  // e.g., http://localhost:3000/cards/9%20H.png
                   alt={`Card ${item.number}`}
-                  style={{ width: "150px", height: "auto" }}
+                  style={{ width: "80px", height: "auto" }}
                 />
-                <p>Card {item.number}</p>
               </div>
             ))}
           </div>
-        ) : (
-          <p>No image to display</p>
-        )}
+        ) : null}
       </div>
     </div>
   );
