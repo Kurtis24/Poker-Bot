@@ -1,28 +1,25 @@
 import pyautogui
-import time
-import cv2
-import numpy as np
-from datetime import datetime
 import os
+from datetime import datetime
 
 # Ensure the screenshots folder exists
 if not os.path.exists("screenshots"):
     os.makedirs("screenshots")
 
-def save_screenshot():
-    """Takes a screenshot and saves it in the screenshots folder"""
+def take_screenshot():
+    """Takes a screenshot and prints the saved file path"""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"screenshots/hand_{timestamp}.png"
     screenshot = pyautogui.screenshot()
     screenshot.save(filename)
-    
-    # Output message so main.py can capture it
-    print(f"Screenshot saved: {filename}")
-    return filename
 
-# If this script is called directly, take a screenshot
+    # Print output so other scripts (e.g., main.py) can capture it
+    print(f"Screenshot saved: {filename}", flush=True)
+
+# Run screenshot capture when script is executed
 if __name__ == "__main__":
-    save_screenshot()
+    take_screenshot()
+
 
 
 
