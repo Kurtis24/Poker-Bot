@@ -11,27 +11,29 @@ const WS_PORT = 3030;
 app.use(cors());
 app.use(express.json());
 
-// Serve static images from the 'Cards' folder.
-// Images will be accessible via URLs like http://localhost:3000/cards/filename.png
-app.use('/cards', express.static(path.join(__dirname, 'Cards')));
+// Serve static screenshots
+app.use("/screenshots", express.static(path.join(__dirname, "screenshots")));
 
-// Set up the WebSocket server on port 3030.
 const wss = new WebSocket.Server({ port: WS_PORT });
 
 wss.on("connection", (ws) => {
   console.log("Client connected to WebSocket");
 
   ws.on("message", (message) => {
-    console.log(`Received from frontend: ${message}`);
+    const parsedMessage = message.toString().trim();
+    console.log(`Received from frontend: ${parsedMessage}`);
 
-    // Spawn the Python process to select a random image.
-    const pythonProcess = spawn("python", ["main.py"]);
+    let pythonProcess;
 
-    // Send the incoming message to Python's stdin.
-    pythonProcess.stdin.write(JSON.stringify({ message: message.toString() }) + "\n");
-    pythonProcess.stdin.end();
+    if (parsedMessage === "take_screenshot") {
+      console.log("Triggering Python to take a screenshot...");
 
-    // Collect Python's stdout and send it back to the client.
+      // Run main.py and pass the take_screenshot command
+      pythonProcess = spawn("python", ["main.py", "take_screenshot"]);
+    } else {
+      pythonProcess = spawn("python", ["main.py"]);
+    }
+
     pythonProcess.stdout.on("data", (data) => {
       const responses = data.toString().trim().split("\n");
       responses.forEach((response) => {

@@ -1,10 +1,9 @@
 import pyautogui
 import time
-import os
 import cv2
-import pytesseract
+import numpy as np
 from datetime import datetime
-import glob
+import os
 
 # Ensure the screenshots folder exists
 if not os.path.exists("screenshots"):
@@ -16,52 +15,78 @@ def save_screenshot():
     filename = f"screenshots/hand_{timestamp}.png"
     screenshot = pyautogui.screenshot()
     screenshot.save(filename)
+    
+    # Output message so main.py can capture it
     print(f"Screenshot saved: {filename}")
     return filename
 
-def process_screenshot(image_path):
-    """Reads a saved screenshot and extracts card information"""
-    image = cv2.imread(image_path)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# If this script is called directly, take a screenshot
+if __name__ == "__main__":
+    save_screenshot()
 
-    # Use OCR to detect card names
-    text = pytesseract.image_to_string(gray)
-    print(f"Detected Cards from {image_path}: {text}")
-    return text
 
-def decide_action(cards):
-    """Basic poker decision-making"""
-    strong_hands = ["AA", "KK", "QQ", "AK", "AQ"]
-    if any(hand in cards for hand in strong_hands):
-        return "Raise"
-    elif "J" in cards or "10" in cards:
-        return "Call"
-    else:
-        return "Fold"
 
-def take_action(action):
-    """Click the appropriate button based on decision"""
-    button_image = f"{action.lower()}_button.png"
-    button = pyautogui.locateCenterOnScreen(button_image)
-    if button:
-        pyautogui.click(button)
-        print(f"Clicked {action} button!")
-    else:
-        print(f"{action} button not found.")
+# import pyautogui
+# import time
+# import cv2
+# import numpy as np
+# from datetime import datetime
+# import os
 
-# Run the bot in a loop
-while True:
-    # Step 1: Take a screenshot
-    screenshot_file = save_screenshot()
+# # Ensure the screenshots folder exists
+# if not os.path.exists("screenshots"):
+#     os.makedirs("screenshots")
 
-    # Step 2: Process the screenshot to extract cards
-    detected_cards = process_screenshot(screenshot_file)
+# def save_screenshot():
+#     """Takes a screenshot and saves it in the screenshots folder"""
+#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     filename = f"screenshots/hand_{timestamp}.png"
+#     screenshot = pyautogui.screenshot()
+#     screenshot.save(filename)
+#     print(f"Screenshot saved: {filename}")
+#     return filename
 
-    # Step 3: Decide what to do
-    action = decide_action(detected_cards)
+# def detect_screen_change(prev_screenshot):
+#     """Compares two screenshots to detect a change in the game state"""
+#     time.sleep(2)  # Give time for the move to be executed
 
-    # Step 4: Perform the action (Bet, Fold, Raise)
-    take_action(action)
+#     # Take a new screenshot
+#     new_screenshot = pyautogui.screenshot()
+#     new_image = np.array(new_screenshot)
+#     new_gray = cv2.cvtColor(new_image, cv2.COLOR_RGB2GRAY)
 
-    # Wait before the next action
-    time.sleep(3)
+#     # Convert previous screenshot
+#     prev_image = np.array(prev_screenshot)
+#     prev_gray = cv2.cvtColor(prev_image, cv2.COLOR_RGB2GRAY)
+
+#     # Compute the difference
+#     difference = cv2.absdiff(prev_gray, new_gray)
+#     change_value = np.sum(difference)
+
+#     print(f"Screen Change Detected: {change_value}")
+    
+#     # If change is significant, save new state
+#     if change_value > 500000:  # Adjust threshold if needed
+#         return save_screenshot()
+    
+#     return None  # No significant change
+
+# def take_action(action):
+#     """Clicks the appropriate button and then takes a new screenshot if game state changes"""
+#     button_image = f"{action.lower()}_button.png"
+#     button = pyautogui.locateCenterOnScreen(button_image)
+    
+#     if button:
+#         prev_screenshot = pyautogui.screenshot()  # Capture state before action
+#         pyautogui.click(button)
+#         print(f"Clicked {action} button!")
+
+#         # Wait and check for game state change
+#         new_screenshot = detect_screen_change(prev_screenshot)
+#         if new_screenshot:
+#             print(f"New game state detected! Screenshot saved: {new_screenshot}")
+#         else:
+#             print("No significant change detected after move.")
+    
+#     else:
+#         print(f"{action} button not found.")
