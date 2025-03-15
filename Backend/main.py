@@ -36,6 +36,7 @@ def send_screenshot_request():
     
     except Exception as e:
         return None, f"Error executing GameAnalysis.py: {str(e)}"
+    
 
 if __name__ == "__main__":
     screenshot_data, error = send_screenshot_request()
