@@ -6,39 +6,52 @@ const GameControls = () => {
   const [isEnabled, setIsEnabled] = useState(true);
   const [cardImages, setCardImages] = useState([]);
 
-  // Helper function to generate 3 random card filenames
-  const generateThreeRandomCards = () => {
+  // Returns a single random card filename, e.g. "7C.png"
+  const getRandomCard = () => {
     const suits = ["C", "D", "H", "S"];
-    const newCards = [];
+    const number = Math.floor(Math.random() * 13) + 1; // 1-13
+    const suit = suits[Math.floor(Math.random() * suits.length)];
+    return `${number}${suit}.png`;
+  };
 
-    for (let i = 0; i < 3; i++) {
-      const number = Math.floor(Math.random() * 13) + 1; // 1-13
-      const suit = suits[Math.floor(Math.random() * suits.length)]; // pick a suit
-      newCards.push(`${number}${suit}.png`);
+  // Returns an array with 'count' random card filenames
+  const getRandomCards = (count) => {
+    const cards = [];
+    for (let i = 0; i < count; i++) {
+      cards.push(getRandomCard());
     }
-
-    return newCards;
+    return cards;
   };
 
   const handleAction = (action) => {
+    // If already disabled, ignore additional clicks
+    if (!isEnabled) return;
+
     console.log(`Player chose to ${action}.`);
 
-    // Disable the buttons briefly
+    // Disable buttons briefly
     setIsEnabled(false);
     setTimeout(() => {
       setIsEnabled(true);
     }, 1000);
 
-    // Increase round; if round was 4, reset to 1
+    // Advance the round (or reset to 1), then update cards
     setRound((prevRound) => {
-      const nextRound = prevRound >= 4 ? 1 : prevRound + 1;
+      const nextRound = prevRound < 4 ? prevRound + 1 : 1;
 
-      // If the new round is 1, generate new card images
       if (nextRound === 1) {
-        const randomCards = generateThreeRandomCards();
-        setCardImages(randomCards);
+        // Round 1 -> clear all cards
+        setCardImages([]);
+      } else if (nextRound === 2) {
+        // Round 2 -> show 3 new cards
+        setCardImages(getRandomCards(3));
+      } else if (nextRound === 3) {
+        // Round 3 -> add exactly 1 more card
+        setCardImages((prev) => [...prev, getRandomCard()]);
+      } else if (nextRound === 4) {
+        // Round 4 -> add exactly 1 more card
+        setCardImages((prev) => [...prev, getRandomCard()]);
       }
-
       return nextRound;
     });
   };
@@ -63,18 +76,18 @@ const GameControls = () => {
         Fold
       </button>
 
-      {/* Display the three random card images whenever you have them */}
+      {/* Render the cards, if any */}
       {cardImages.length > 0 && (
         <div className="card-container">
           {cardImages.map((img, index) => (
             <img
               key={index}
-              src={`./Cards/${img}`} 
-              alt={`${img}`}
+              src={`./Cards/${img}`}
+              alt={img}
               style={{
                 width: "50px",
                 height: "auto",
-                margin: "5px"
+                margin: "5px",
               }}
             />
           ))}
