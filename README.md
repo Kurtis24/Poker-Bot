@@ -59,8 +59,16 @@ Opens React app on `http://localhost:3001` (or configured port).
 3. Click **Bet** to wager (deducts from balance).
 4. Click **Fold** to reset the hand.
 
+## UI
+<img width="772" alt="Screenshot 2025-04-20 at 3 38 36 PM" src="https://github.com/user-attachments/assets/a49b0e6c-bdca-4a73-bacc-76811feaa997" /> 
+![Uploading Screenshot 2025-04-20 at 3.38.56 PM.png…]()
+
 ## 📜 License
 MIT © Kurtis Lin 
 
 ## Notes
 Its not gambling if you know you are going to win
+
+
+
+
