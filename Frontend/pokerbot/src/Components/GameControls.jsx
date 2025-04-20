@@ -1,59 +1,98 @@
+// src/Components/GameControls.js
 import React, { useState } from "react";
-import "./GameControls.css"; // Import CSS file
+import ScrollBar from "./ScrollBar";
+import "./GameControls.css";  // Import CSS file
 
-const GameControls = () => {
+const GameControls = ({ onCardsDealt, onPlayerAction }) => {
   const [round, setRound] = useState(1);
   const [isEnabled, setIsEnabled] = useState(true);
   const [cardImages, setCardImages] = useState([]);
+  const [deck, setDeck] = useState(() => initializeDeck());
+  const [betValue, setBetValue] = useState(0);
 
-  // Returns a single random card filename, e.g. "7C.png"
-  const getRandomCard = () => {
+  // Initialize a full 52-card deck
+  function initializeDeck() {
     const suits = ["C", "D", "H", "S"];
-    const number = Math.floor(Math.random() * 13) + 1; // 1-13
-    const suit = suits[Math.floor(Math.random() * suits.length)];
-    return `${number}${suit}.png`;
-  };
+    const deckArr = [];
+    suits.forEach((suit) => {
+      for (let num = 1; num <= 13; num++) {
+        deckArr.push(`${num}${suit}.png`);
+      }
+    });
+    return deckArr;
+  }
 
-  // Returns an array with 'count' random card filenames
-  const getRandomCards = (count) => {
-    const cards = [];
-    for (let i = 0; i < count; i++) {
-      cards.push(getRandomCard());
+  // Draw 'count' unique cards from the deck
+  function drawCards(count, currentDeck) {
+    const newDeck = [...currentDeck];
+    const drawn = [];
+    for (let i = 0; i < count && newDeck.length > 0; i++) {
+      const idx = Math.floor(Math.random() * newDeck.length);
+      drawn.push(newDeck.splice(idx, 1)[0]);
     }
-    return cards;
-  };
+    return { drawn, newDeck };
+  }
 
   const handleAction = (action) => {
-    // If already disabled, ignore additional clicks
     if (!isEnabled) return;
+    // send the player action (no amount)
+    onPlayerAction?.(action, 0);
 
-    console.log(`Player chose to ${action}.`);
-
-    // Disable buttons briefly
     setIsEnabled(false);
-    setTimeout(() => {
-      setIsEnabled(true);
-    }, 1000);
+    setTimeout(() => setIsEnabled(true), 1000);
 
-    // Advance the round (or reset to 1), then update cards
-    setRound((prevRound) => {
-      const nextRound = prevRound < 4 ? prevRound + 1 : 1;
+    // If player folds, reset everything
+    if (action === "fold") {
+      setRound(1);
+      setCardImages([]);
+      setDeck(initializeDeck());
+      onCardsDealt?.([]);
+      return;
+    }
 
-      if (nextRound === 1) {
-        // Round 1 -> clear all cards
-        setCardImages([]);
-      } else if (nextRound === 2) {
-        // Round 2 -> show 3 new cards
-        setCardImages(getRandomCards(3));
-      } else if (nextRound === 3) {
-        // Round 3 -> add exactly 1 more card
-        setCardImages((prev) => [...prev, getRandomCard()]);
-      } else if (nextRound === 4) {
-        // Round 4 -> add exactly 1 more card
-        setCardImages((prev) => [...prev, getRandomCard()]);
-      }
-      return nextRound;
-    });
+    // Determine next round
+    const nextRound = round < 4 ? round + 1 : 1;
+    let newCards = [];
+    let updatedDeck = [...deck];
+
+    if (nextRound === 1) {
+      // Reset deck and deal 4 new cards
+      updatedDeck = initializeDeck();
+      const { drawn, newDeck } = drawCards(4, updatedDeck);
+      newCards = drawn;
+      updatedDeck = newDeck;
+    } else if (nextRound === 2) {
+      // Flop: deal 3 new cards
+      const { drawn, newDeck } = drawCards(3, updatedDeck);
+      newCards = drawn;
+      updatedDeck = newDeck;
+    } else if (nextRound === 3) {
+      // Turn: add 1 more card
+      const { drawn, newDeck } = drawCards(1, updatedDeck);
+      newCards = [...cardImages, ...drawn];
+      updatedDeck = newDeck;
+    } else if (nextRound === 4) {
+      // River: add 1 more card
+      const { drawn, newDeck } = drawCards(1, updatedDeck);
+      newCards = [...cardImages, ...drawn];
+      updatedDeck = newDeck;
+    }
+
+    setRound(nextRound);
+    setCardImages(newCards);
+    setDeck(updatedDeck);
+    onCardsDealt?.(newCards);
+  };
+
+  const handleBet = () => {
+    if (!isEnabled) return;
+    // send the bet action with amount
+    onPlayerAction?.("bet", betValue);
+
+    setIsEnabled(false);
+    setTimeout(() => setIsEnabled(true), 1000);
+    console.log(`Betting ${betValue}`);
+    // You can still advance rounds or keep game state logic here if desired
   };
 
   return (
@@ -76,7 +115,16 @@ const GameControls = () => {
         Fold
       </button>
 
-      {/* Render the cards, if any */}
+      <button
+        className={`bet-btn ${isEnabled ? "enabled" : "disabled"}`}
+        onClick={handleBet}
+        disabled={!isEnabled}
+      >
+        Bet {betValue}
+      </button>
+
+      <ScrollBar value={betValue} setValue={setBetValue} />
+
       {cardImages.length > 0 && (
         <div className="card-container">
           {cardImages.map((img, index) => (
@@ -84,11 +132,7 @@ const GameControls = () => {
               key={index}
               src={`./Cards/${img}`}
               alt={img}
-              style={{
-                width: "50px",
-                height: "auto",
-                margin: "5px",
-              }}
+              style={{ width: "100px", height: "auto", margin: "5px" }}
             />
           ))}
         </div>
