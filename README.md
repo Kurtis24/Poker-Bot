@@ -1,6 +1,6 @@
 # PokerBot
 
-A full-stack **PokerBot** that deals virtual poker hands, evaluates hand strength using game-theoretic optimal (GTO) logic, and makes action recommendations (fold, call, raise). The frontend is a React app with a WebSocket-based connection to a Node/Express backend, which in turn invokes a Python `GTO.py` script to compute strategy. 🚀
+An interactive **PokerBot** designed for players to train and improve their poker skills by competing against an AI that plays a game-theoretically optimal (GTO) strategy. The React frontend communicates via WebSockets with a Node/Express backend, which invokes a Python GTO.py script to calculate perfect-play recommendations (fold, call, raise). 🚀
 
 ## 🌟 Features
 - **React Frontend**
@@ -11,7 +11,7 @@ A full-stack **PokerBot** that deals virtual poker hands, evaluates hand strengt
   - Serves static card images under 
   - WebSocket server listens on port 3030 
   - Buffers four card filenames per deal, identifies hole cards, invokes Python analysis 
-  - Forwards JSON output from Python directly to the client 📤
+  - Forwards JSON output from Python directly to the client 
 - **Python GTO Analysis** (`GTO.py`)
   - Parses two hole‑card filenames and current round 
   - Computes hand strength via `treys` evaluator 
@@ -44,14 +44,14 @@ A full-stack **PokerBot** that deals virtual poker hands, evaluates hand strengt
 ```bash
 node server.js
 ```
-- HTTP server on `http://localhost:3000` 🌐
-- WebSocket server on `ws://localhost:3030` 🔌
+- HTTP server on `http://localhost:3000` 
+- WebSocket server on `ws://localhost:3030` 
 
 ### Frontend
 ```bash
 npm start
 ```
-Opens React app on `http://localhost:3001` (or configured port). 🎨
+Opens React app on `http://localhost:3001` (or configured port). 
 
 ## 🎲 Usage
 1. Click **Check** to deal new cards each round.
